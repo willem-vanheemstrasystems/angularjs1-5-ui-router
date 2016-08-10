@@ -112,4 +112,149 @@ $stateProvider
     [...]
 ```
 
+#UI-Router Parameters
+
+Based on 'UI-Router Parameters' at https://www.youtube.com/watch?v=XRdi54tYtU4&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl&index=44
+
+Three steps to use URL parameters with ui-router:
+
+Step 1. Define the state with ```url``` parameter
+
+```javascript
+    [...]
+    .state("studentDetails", {
+        url: "/students/:id",
+        templateUrl: "templates/studentDetails.html",
+        controller: "studentDetailsCtrl",
+        controllerAs: "ctrl"
+    })
+```
+
+Step 2. Link to the state with ```url``` parameter
+
+```javascript
+[...]
+<ul>
+    <li data-ng-repeat="student in ctrl.students">
+        <a data-ui-sref="studentDetails({id: student.id })">
+            {{ student.name }}
+        </a>
+    </li>
+</ul>
+[...]
+```
+
+Step 3. Access ```url``` parameters, using ```$stateParams``` (instead of $routeParams)
+
+```javascript
+    .controller("studentDetailsCtrl", function($http, $stateParams) {
+         var vm = this;
+         // $http({
+         //   url: "StudentsService/GetStudent",
+         //   params: {id:$stateParams.id},
+         //   method: "get"
+         // })
+         // .then(function(response) {
+         //   vm.student = response.data;
+         // }, function(reason) {
+         //   vm.error = reason.data;
+         // });
+         var students = [{ id: 1, name: "Ben", gender: "Male", city: "London" }, { id: 2, name: "Matt", gender: "Male", city: "New York" }, { id: 3, name: "Pam", gender: "Female", city: "Chennai" }];
+         vm.student = students[$stateParams.id-1];
+    })
+```
+
+#UI-Router Optional Parameters
+
+Based on 'UI-Router Optional Parameters' at https://www.youtube.com/watch?v=sjDmmcARWCE&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl&index=45
+
+With ```ngRoute``` module to make a parameter optional, we include a question mark (?) at the end of the parameter name.
+With ```ui-router``` the parameters are optional by default, so there is nothing special that we have to do.
+
+Step 1. Define studentsSearch state
+
+```javascript
+    .state("studentsSearch", {
+        url: "/studentsSearch/:name",
+        templateUrl: "templates/studentsSearch.html",
+        controller: "studentsSearchCtrl",
+        controllerAs: "ctrl"
+    })
+```
+
+Step 2. Modify studentsSearch() function that gets called when the search button is clicked.
+
+```javascript
+    [...]
+    .controller("studentsCtrl", function(studentsList, $state) {
+
+        var vm = this;
+
+        vm.searchStudent = function() {
+            $state.go("studentsSearch", {name: vm.name});
+        }
+
+        vm.reloadData = function() {
+            $state.reload();
+        }
+
+        vm.students = studentsList;
+    })
+```
+
+Step 3. Modify studentsSearch controller function to retrieve name URL parameter value.
+
+```javascript
+    .controller("studentsSearchCtrl", function($http, $stateParams, $log) {
+        var vm = this;
+        // Check is a 'name' parameters is in the URL
+        if($stateParams.name) {
+            // $http({
+            //   url: "StudentsService/GetStudentsByName",
+            //   params: {name: $stateParams.name},
+            //   method: "get"
+            // })
+            // .then(function(response) {
+            //   vm.student = response.data;
+            // }, function(reason) {
+            //   vm.error = reason.data
+            // });
+            var students = [{ id: 1, name: "Ben", gender: "Male", city: "London" }, { id: 2, name: "Matt", gender: "Male", city: "New York" }, { id: 3, name: "Pam", gender: "Female", city: "Chennai" }];
+            // Use a filter method to retrieve only those students whose name match with the name provided in the URL
+            function filterStudentsByName(student) {
+                $log.debug(student);
+                // Check if the name in the param is a substring of the student name
+                return student.name.toUpperCase().indexOf($stateParams.name.toUpperCase()) >= 0;
+            }
+            var matchingStudents = students.filter(filterStudentsByName);
+            $log.debug(matchingStudents);
+            vm.students = matchingStudents;
+        }
+        else {
+            // $http.get("StudentsService/GetAllStudents")
+            //      .then(function(response) {
+            //            vm.students = response.data;
+            //       }, function(reason) {
+            //            vm.error = reason.data;
+            //       });
+            vm.students = [{ id: 1, name: "Ben", gender: "Male", city: "London" }, { id: 2, name: "Matt", gender: "Male", city: "New York" }, { id: 3, name: "Pam", gender: "Female", city: "Chennai" }];
+        }
+    });
+```
+
+#Programmatically activating a state using ```$state``` service ```go()``` method
+
+See example above.
+```javascript
+    [...]
+    vm.searchStudent = function() {
+        $state.go("studentsSearch", {name: vm.name});
+    }
+```
+
+#Case sensitivity with ui router
+
+
+
+
 See script.js, index.html and styles.css how to implement this.

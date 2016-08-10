@@ -5,7 +5,7 @@ Name : <input type="text" data-ng-model="ctrl.name" />
 <br /><br />
 <ul>
     <li data-ng-repeat="student in ctrl.students">
-        <a href="#students/{{ student.id }}">
+        <a data-ui-sref="studentDetails({id: student.id })">
             {{ student.name }}
         </a>
     </li>
