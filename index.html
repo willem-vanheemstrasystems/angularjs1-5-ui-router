@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" data-ng-app="myModule">
+<head>
+    <meta charset="UTF-8">
+    <title>My Angular App</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.1/angular-ui-router.js"></script>
+    <script src="script.js"></script>
+</head>
+<body>
+<table style="font-family:Arial">
+    <tr>
+        <td colspan="2" class="header">
+            <h1>
+                WebSite Header
+            </h1>
+        </td>
+    </tr>
+    <tr>
+        <td class="leftMenu">
+            <a ui-sref="home">Home</a>
+            <a ui-sref="courses">Courses</a>
+            <a ui-sref="students">Students</a>
+        </td>
+        <td class="mainContent">
+            <data-ui-view></data-ui-view>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" class="footer">
+            <b>WebSite Footer</b>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
