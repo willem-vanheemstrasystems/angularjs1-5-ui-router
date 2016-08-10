@@ -1,7 +1,8 @@
 var myApp = angular
     .module("myModule", ["ui.router"])
-    .config(function($stateProvider) {
-        // $routeProvider.caseInsensitiveMatch = true;
+    .config(function($stateProvider, $urlMatcherFactoryProvider, $urlRouterProvider) {
+        $urlRouterProvider.otherwise("/home");
+        $urlMatcherFactoryProvider.caseInsensitive(true);
 
         $stateProvider
             .state("home", {
@@ -46,9 +47,6 @@ var myApp = angular
                 controller: "studentsSearchCtrl",
                 controllerAs: "ctrl"
             })
-            // .otherwise({
-            //     redirectTo: "/home"
-            // })
     })
     .controller("homeCtrl", function() {
         var vm = this;

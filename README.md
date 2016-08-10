@@ -254,7 +254,32 @@ See example above.
 
 #Case sensitivity with ui router
 
+Based on 'Case sensitivity with ui router' at https://www.youtube.com/watch?v=cJ9PhXKS7zU&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl&index=46
 
+Routes that are configured using ```ui-router``` are case-sensitive by default.
 
+To make the routes case-insensitive inject ```$urlMatcherFactoryProvider``` service into the config() function and call ```caseInsensitive(true)``` function.
+
+```javascript
+var myApp = angular
+    .module("myModule", ["ui.router"])
+    .config(function($stateProvider, $urlMatcherFactoryProvider) {
+        $urlMatcherFactoryProvider.caseInsensitive(true);
+    [...]
+```
+
+#Default route with ui router
+
+Based on 'Default route with ui router' at https://www.youtube.com/watch?v=DJreBFFDGBo&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl&index=47
+
+To configure the default route when you are using ```ui-router```, inject ```$urlRouterProvider``` service into the config() function and use ```otherwise()``` function passing it the default route.
+
+```javascript
+var myApp = angular
+    .module("myModule", ["ui.router"])
+    .config(function($stateProvider, $urlMatcherFactoryProvider, $urlRouterProvider) {
+        $urlRouterProvider.otherwise("/home");
+        [...]
+```
 
 See script.js, index.html and styles.css how to implement this.
