@@ -282,4 +282,64 @@ var myApp = angular
         [...]
 ```
 
+#Custom data with ui router
+
+Based on 'Custom data with ui router' at https://www.youtube.com/watch?v=NF4IInqy-00&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl&index=48
+
+To add custom data to a state, use ```data``` property
+
+```javascript
+    [...]
+    $stateProvider
+        .state("home", {
+            url: "/home",
+            templateUrl: "templates/home.html",
+            controller: "homeCtrl",
+            controllerAs: "ctrl",
+            data: {
+                customData1: "Home State Custom Data 1",
+                customData2: "Home State Custom Data 2"
+            }
+        })
+```
+
+Custom data is now available in all the home controller functions.
+
+```javascript
+    .controller("homeCtrl", function($state) {
+        var vm = this;
+        vm.pageTitle = "Home";
+        vm.homeCustomData1 = $state.current.data.customData1;
+        vm.homeCustomData2 = $state.current.data.customData2;
+        // Access the custom data of the 'courses' state
+        vm.coursesCustomData1 = $state.get("courses").data.customData1;
+        vm.coursesCustomData2 = $state.get("courses").data.customData2;
+    })
+```
+
+This can now be displayed on the 'home' view
+
+```javascript
+    <fieldset>
+        <legend>Home</legend>
+        Custom Data 1 : {{ ctrl.homeCustomData1 }}
+        <br />
+        Custom Data 2 : {{ ctrl.homeCustomData2 }}
+    </fieldset>
+    
+    <fieldset>
+        <legend>Courses</legend>
+        Custom Data 1 : {{ ctrl.coursesCustomData1 }}
+        <br />
+        Custom Data 2 : {{ ctrl.coursesCustomData2 }}
+    </fieldset>
+```
+
+#html5mode with ui router
+
+Based on 'html5mode with ui router' at https://www.youtube.com/watch?v=I3QZC0y9_nw&index=49&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl
+
+
+
+
 See script.js, index.html and styles.css how to implement this.

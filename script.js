@@ -9,13 +9,21 @@ var myApp = angular
                 url: "/home",
                 templateUrl: "templates/home.html",
                 controller: "homeCtrl",
-                controllerAs: "ctrl"
+                controllerAs: "ctrl",
+                data: {
+                    customData1: "Home State Custom Data 1",
+                    customData2: "Home State Custom Data 2"
+                }
             })
             .state("courses", {
                 url: "/courses",
                 templateUrl: "templates/courses.html",
                 controller: "coursesCtrl",
-                controllerAs: "ctrl"
+                controllerAs: "ctrl",
+                data: {
+                    customData1: "Courses State Custom Data 1",
+                    customData2: "Courses State Custom Data 2"
+                }
             })
             .state("students", {
                 url: "/students",
@@ -48,9 +56,14 @@ var myApp = angular
                 controllerAs: "ctrl"
             })
     })
-    .controller("homeCtrl", function() {
+    .controller("homeCtrl", function($state) {
         var vm = this;
         vm.pageTitle = "Home";
+        vm.homeCustomData1 = $state.current.data.customData1;
+        vm.homeCustomData2 = $state.current.data.customData2;
+        // Access the custom data of the 'courses' state
+        vm.coursesCustomData1 = $state.get("courses").data.customData1;
+        vm.coursesCustomData2 = $state.get("courses").data.customData2;
     })
     .controller("coursesCtrl", function($http) {
         var vm = this;
