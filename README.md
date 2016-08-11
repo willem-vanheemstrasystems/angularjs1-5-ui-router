@@ -335,11 +335,350 @@ This can now be displayed on the 'home' view
     </fieldset>
 ```
 
-#html5mode with ui router
+See scriptA.js, indexA.html and stylesA.css how to implement this.
 
-Based on 'html5mode with ui router' at https://www.youtube.com/watch?v=I3QZC0y9_nw&index=49&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl
+#html5Mode with ui router
 
+Based on 'html5Mode with ui router' at https://www.youtube.com/watch?v=I3QZC0y9_nw&index=49&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl
 
+Step 1: Enable html5Mode routing
 
+```javascript
+var myApp = angular
+    .module("myModule", ["ui.router"])
+    .config(function($locationProvider, $stateProvider, $urlMatcherFactoryProvider, $urlRouterProvider) {
+        $locationProvider.html5Mode(true);
+        [...]
+```
 
-See script.js, index.html and styles.css how to implement this.
+Step 2: Remove # symbols from the URLs
+
+As we are using ```ui-sref``` with ui router we do ***not*** have # symbols. 
+Therefore this step is ***not*** applicable when using ui router.
+
+Step 3: Include the following URL rewrite rule in web.config
+
+```javascript
+<system.webServer>
+    <rewrite>
+        <rules>
+            <rule name="RewriteRules" stopProcessing="true">
+                <match url=".*" />
+                <conditions logicalGrouping="MatchAll">
+                    <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                    <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                    <add input="{REQUEST_URI}" pattern="^/(api)" negate="true" />
+                </conditions>
+                <action type="Rewrite" url="/indexB.html" />
+            </rule>
+        </rules>
+    </rewrite>
+</system.webServer>
+```
+
+Step 4: Set the base href to the location of your layout page. 
+Note: make sure to place the base href BEFORE the links to scripts and/or stylesheets.
+
+```javascript
+<base href="/" />
+```
+
+See scriptB.js, indexB.html and stylesB.css how to implement this.
+
+#ui router active state css
+
+Based on 'ui router active state css' at https://www.youtube.com/watch?v=Dl8j6fOP07I&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl&index=50
+
+How to highlight the navigation menu item if the user is currently on that page.
+
+Step 1. Create an activeState class in the styles.css file
+
+```javascript
+[...]
+.activeState {
+    background-color: black;
+    color: white;
+}
+```
+
+Step 2. Add the ui-sref-active directive to all the links on the page, with a value of the class created in step 1.
+
+```javascript
+    [...]
+    <a ui-sref="home" ui-sref-active="activeState">Home</a>
+    [...]
+```
+
+See scriptC.js, indexC.html and stylesC.css how to implement this.
+
+#nested view with ui router
+
+Based on 'nested views ui router' at https://www.youtube.com/watch?v=rT5HauC4cQg&index=51&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl
+
+Two common methods:
+
+Using dot notation
+```javascript
+.state("studentParent", {
+    // parent state config properties
+})
+.state("studentParent.students", {
+    // child state config properties
+})
+```
+
+Using the 'parent' property with the parent name as string
+```javascript
+.state("studentParent", {
+    // parent state config properties
+})
+.state("students", {
+    parent: "studentParent"
+    // child state config properties
+})
+```
+
+Step 1: Create the service that will return the total of Males, Females and Grand Total.
+Note: this code is not included here, watch the video how to implement this.
+
+Step 2: In scriptD.js create a "studentParent" state, which will be the parent for "students" and "studentDetails" state.
+
+```javascript
+    .state("studentParent", {
+        url: "/students",
+        controller: "studentParentCtrl",
+        controllerAs: "ctrl",
+        templateUrl: "templates/studentParentE.html",
+        resolve: {
+            studentTotals: function ($http) {
+                //return $http.get("StudentService.asmx/GetStudentTotals")
+                //    .then(function(response) {
+                //        return response.data;
+                //    })
+    
+                // Mimicking a return over http
+                return {total: 3, males: 2, female: 1};
+            }
+        },
+        abstract: true
+    })
+```
+
+The URL of the parent state is prepended to the URL of all the child states.
+That means we can remove any redundant part from the child states URLs.
+All the data in the parent state will be available in the child states.
+
+About '***abstract***' state:
+
+- When a child state is created, its parent state is implicitly created as well (if it is set to abstract true).
+
+- When a child state is activated, its parent state is implicitly activated as well (if it is set to abstract true).
+
+Step 3: In scriptD.js, modify students and studentDetails to be child states, by prepending the parent state name to the state name using the dot notation.
+
+```javascript
+    .state("studentParent.students", {
+        url: "/",
+        templateUrl: "templates/students.html",
+        controller: "studentsCtrl",
+        controllerAs: "ctrl",
+        resolve: {
+            // A function that returns a promise
+            studentsList: function($http) {
+                // return $http.get("StudentsService/GetAllStudents")
+                //      .then(function(response) {
+                //            return response.data;
+                //       }, function(reason) {
+                //            return reason.data;
+                //       });
+                return [{ id: 1, name: "Ben", gender: "Male", city: "London" }, { id: 2, name: "Matt", gender: "Male", city: "New York" }, { id: 3, name: "Pam", gender: "Female", city: "Chennai" }];
+            }
+        }
+    })
+    .state("studentParent.studentDetails", {
+        url: "/:id",
+        templateUrl: "templates/studentDetails.html",
+        controller: "studentDetailsCtrl",
+        controllerAs: "ctrl"
+    })
+```
+
+Notice above that the urls have been trimmed (e.g not /students/:id, but /:id) as the parent state already has the url '/students'.
+
+Step 4: In scriptD.js, create studentParentController function
+
+```javascript
+.controller("studentParentController", function(studentTotals) {
+    var vm = this;
+    
+    vm.males = studentTotals.males;
+    vm.females = studentTotals.females;
+    vm.total = studentTotals.total;
+})
+```
+
+Step 5: Create a studentParentE.html template
+
+```javascript
+<h3>Total Male Students: {{ ctrl.males }}</h3>
+<h3>Total Female Students: {{ ctrl.females }}</h3>
+<h3>Grand Total: {{ ctrl.total }}</h3>
+
+<ui-view></ui-view>
+```
+
+Step 6: In indexD.html, modify the students link by prepending it with studentParent
+
+```javascript
+    [...]
+    <a ui-sref="studentParent.students" ui-sref-active="activeState">Students</a>
+    [...]
+```
+
+Step 7: In studentsD.html, modify the individual student's link by prepending it with studentParent
+
+```javascript
+    [...]
+    <ul>
+        <li data-ng-repeat="student in ctrl.students">
+            <a data-ui-sref="studentParent.studentDetails({id: student.id })">
+                {{ student.name }}
+            </a>
+        </li>
+    </ul>
+    [...]
+```
+
+Step 8: In studentDetailsD.html, modify the "Back to Students" link by prepending it with studentParent
+
+```javascript
+[...]
+<a data-ui-sref="studentParent.students">Back to Students list</a>
+```
+
+Step 9: The parent state resolved dependencies are available to child states. To prove this, we want to display the total number of students on the students page against the List of Students text.
+
+Inject ```studentTotals``` into students controller function.
+
+```javascript
+   .controller("studentsCtrl", function(studentsList, $state, studentTotals) {
+
+        var vm = this;
+
+        vm.searchStudent = function() {
+            $state.go("studentsSearch", {name: vm.name});
+        }
+
+        vm.reloadData = function() {
+            $state.reload();
+        }
+
+        vm.students = studentsList;
+        
+        vm.studentTotals = studentTotals;
+    })
+```
+
+In ```students.html```, display the student total
+
+```javascript
+<h1>
+    List of Students ({{ ctrl.studentTotals.total }})
+</h1>
+```
+
+See scriptD.js, indexD.html and stylesD.css how to implement this.
+
+#Multiple named views with ui router
+
+Based on 'multiple named views with ui router' at https://www.youtube.com/watch?v=G6rB5-SSan4&index=52&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl
+
+Note: ngRoute does ***not*** support multiple named views, whereas ui router does.
+
+Step 1: In studentParentE.html, modify the ui-view element to the following
+ 
+```javascript
+    [...]
+    <div data-ui-view="totalData"></div>
+    <div data-ui-view="studentData"></div>
+    [...]
+```
+
+Step 2: Include the ```views``` property in the "students" state and nest each view inside
+
+```javascript
+    [...]
+    .state("studentParent.students", {
+        url: "/",
+        views: {
+            "studentData" : {
+                templateUrl: "templates/studentsE.html",
+                controller: "studentsCtrl",
+                controllerAs: "ctrl",
+                resolve: {
+                    // A function that returns a promise
+                    studentsList: function($http) {
+                        // return $http.get("StudentsService/GetAllStudents")
+                        //      .then(function(response) {
+                        //            return response.data;
+                        //       }, function(reason) {
+                        //            return reason.data;
+                        //       });
+                        return [{ id: 1, name: "Ben", gender: "Male", city: "London" }, { id: 2, name: "Matt", gender: "Male", city: "New York" }, { id: 3, name: "Pam", gender: "Female", city: "Chennai" }];
+                    }
+                }
+            },
+            "totalData" : {
+                templateUrl: "templates/studentsTotalE.html",
+                controller: "studentsTotalCtrl",
+                controllerAs: "ctrl"
+            }
+        }
+    })
+```
+
+Step 3: Add a "studentsTotalCtrl" controller to scriptE.js
+
+```
+    [...]
+    .controller("studentsTotalCtrl", function(studentTotals) {
+        var vm = this;
+        vm.total = studentTotals.total;
+    })
+    [...]
+```
+
+Step 4: Create a "studentsTotalE.html" template
+
+```javascript
+    <h3>Grand Total : {{ ctrl.total }}</h3>
+```
+
+Step 5: Include the ```views``` property in the "studentDetails" state and nest each view inside
+
+```javascript
+    [...]
+    .state("studentParent.studentDetails", {
+        url: "/:id",
+        views: {
+            "studentData": {
+                templateUrl: "templates/studentDetailsE.html",
+                controller: "studentDetailsCtrl",
+                controllerAs: "ctrl"
+            }
+        }
+    })
+    [...]
+```
+
+See scriptE.js, indexE.html and stylesE.css how to implement this.
+
+#Difference between ngRoute and ui-router
+
+Based on 'Difference between ngRoute and ui-router' at https://www.youtube.com/watch?v=GEZAZpyWHVk&list=PL6n9fhu94yhWKHkcL7RJmmXyxkuFB3KSl&index=53
+
+- ngRoute is developed by the Angular team, whereas ui-router is a 3rd-party module
+- ngRoute implements routing based on the route URL, whereas ui-router implements routing based on the state of the application
+- ui-router provides everything that the ngRoute module provides plus the following features:
+-- Nested states and views
+-- Multiple named views
